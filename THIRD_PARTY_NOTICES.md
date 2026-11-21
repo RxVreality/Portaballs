@@ -3,11 +3,11 @@
 ## In this repository
 
 **OpenVR** (`helper/thirdparty/openvr/`: `openvr_api.cs` and `openvr_api.dll`), by Valve Corporation,
-BSD 3-Clause licence. The full text is in `helper/thirdparty/openvr/LICENSE` and is copied next to the
+BSD 3-Clause license. The full text is in `helper/thirdparty/openvr/LICENSE` and is copied next to the
 helper when it's built. Source: https://github.com/ValveSoftware/openvr
 
 **s&box engine source files** (`engine-patches/files/` and the `.patch` files), by Facepunch Studios Ltd,
-MIT licence, changed for Portaballs. See `engine-patches/LICENSE-sbox.md`.
+MIT license, changed for Portaballs. See `engine-patches/LICENSE-sbox.md`.
 
 ## Downloaded on your PC by the installer, not included here
 

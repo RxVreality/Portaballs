@@ -1,6 +1,6 @@
 The files in `files/` are copies of s&box engine source files from
 https://github.com/Facepunch/sbox-public (commit a8a63b3ad2ad5dcc0712eac863810b70d94a26a0), changed for
-Portaballs. The `.patch` files show exactly what was changed. They are under s&box's licence:
+Portaballs. The `.patch` files show exactly what was changed. They are under s&box's license:
 
 ```
 Copyright (c) 2025 Facepunch Studios Ltd
@@ -25,5 +25,5 @@ SOFTWARE.
 ```
 
 Only C# source is changed. The native engine binaries that s&box's `Setup.bat` downloads are not
-covered by that licence, are not part of this repository, and come to you from Facepunch under
+covered by that license, are not part of this repository, and come to you from Facepunch under
 their terms (https://store.steampowered.com/eula/590830_eula_0).

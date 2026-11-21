@@ -1,7 +1,7 @@
 # How it works
 
 The numbers behind Portaballs, for anyone who wants to change them. Everything here is measured or set in
-this repository; where a value lives in code, the file is named. Units are metres and seconds, +X forward,
+this repository; where a value lives in code, the file is named. Units are meters and seconds, +X forward,
 +Y left, +Z up (`core/src/Common/Units.cs`).
 
 ## The room
@@ -42,7 +42,7 @@ All the feel numbers are in `core/src/Paint/SplatFeel.cs`.
 
 ## Portals
 
-- One patch per colour. A new splat that touches its colour's patch joins it, one that lands elsewhere
+- One patch per color. A new splat that touches its color's patch joins it, one that lands elsewhere
   replaces it.
 - The crossing is a rigid mapping from one patch to the other, centred on the paint, like Portal's. Balls
   keep their speed and come out in the mapped direction.

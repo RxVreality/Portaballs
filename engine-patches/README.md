@@ -62,4 +62,4 @@ To take the changes out again: `git checkout --force a8a63b3a` in the engine fol
 `engine\Sandbox.Engine\Systems\Render\PortalViews.cs`, remove the three symbols from the `.sbproj`, and run the
 same build command.
 
-See [LICENSE-sbox.md](LICENSE-sbox.md) for the licence of these files.
+See [LICENSE-sbox.md](LICENSE-sbox.md) for the license of these files.
