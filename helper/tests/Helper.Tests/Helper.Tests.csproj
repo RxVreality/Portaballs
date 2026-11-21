@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <RootNamespace>Portaballs.Helper.Tests</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\app\PortaballsHelper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Vec3 / Quat aliases, and the game's own release detector (read only) to prove the grip
+         timestamps do their job. Everything else from core comes in through the helper itself. -->
+    <Compile Include="..\..\..\core\src\Common\Aliases.cs" Link="core\Aliases.cs" />
+    <Compile Include="..\..\..\core\src\Throwing\ReleaseDetector.cs" Link="core\ReleaseDetector.cs" />
+  </ItemGroup>
+
+</Project>

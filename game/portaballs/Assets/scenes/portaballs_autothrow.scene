@@ -1,0 +1,50 @@
+{
+  "__guid": "3a8e5d21-9c47-4b6e-8f12-5d0b7a4c6e93",
+  "GameObjects": [
+    {
+      "__guid": "7e2b9f64-1d3a-4c85-a6f0-2b8c4d1e9a57",
+      "Flags": 0,
+      "Name": "Portaballs",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Portaballs.PortaballsGame",
+          "__guid": "c5f1a2d8-6b4e-4a39-9d7c-8e3f0b2a1c64",
+          "SwapHandColours": false,
+          "UseRealGravity": true,
+          "GravityMetres": 9.81,
+          "AutoThrow": true,
+          "AutoThrowScript": "PaintTour",
+          "AutoThrowDelay": 3,
+          "DeskEyeHeight": 1.6
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 60,
+    "NetworkInterpolation": true,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "portaballs_autothrow",
+  "Description": "Same as portaballs.scene but throws one orange and one blue ball by itself after 3 seconds, for headless tests.",
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 1
+}

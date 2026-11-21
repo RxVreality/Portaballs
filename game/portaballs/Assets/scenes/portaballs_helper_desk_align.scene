@@ -1,0 +1,55 @@
+{
+  "__guid": "45d0ae14-007f-4bfc-809d-61833fc296e2",
+  "GameObjects": [
+    {
+      "__guid": "0bd46399-e7b5-420a-b763-2822460d70cb",
+      "Flags": 0,
+      "Name": "Portaballs",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Portaballs.PortaballsGame",
+          "__guid": "a7dea0be-087a-4184-930b-62b735bb1a88",
+          "SwapHandColours": false,
+          "UseRealGravity": true,
+          "GravityMetres": 9.81,
+          "AutoThrow": false,
+          "AutoThrowScript": "TwoThrows",
+          "AutoThrowDelay": 3,
+          "DeskEyeHeight": 1.6,
+          "UseHelper": true,
+          "HelperPorts": "8443,28461",
+          "HelperDeskTest": true,
+          "HelperDeskAlignTest": true,
+          "ShowReadout": true
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 60,
+    "NetworkInterpolation": true,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "portaballs_helper_desk_align",
+  "Description": "Desk test of the helper link AND of lining its space up with the play area: a pretend engine reports the poses turned, shifted and guessed ahead. Start helper\\dist\\PortaballsHelper.exe --fake --port 8443 first.",
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 1
+}

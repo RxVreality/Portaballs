@@ -1,0 +1,36 @@
+{
+  "Title": "Portaballs",
+  "Type": "game",
+  "Org": "local",
+  "Ident": "portaballs",
+  "Schema": 1,
+  "IncludeSourceFiles": false,
+  "Resources": null,
+  "PublishUsedAssetsOnly": true,
+  "PackageReferences": [],
+  "EditorReferences": null,
+  "Mounts": null,
+  "IsStandaloneOnly": false,
+  "AI": {
+    "EnableMcpCommunication": true
+  },
+  "Metadata": {
+    "MaxPlayers": 64,
+    "MinPlayers": 1,
+    "TickRate": 50,
+    "GameNetworkType": "Multiplayer",
+    "MapSelect": "Unrestricted",
+    "MapList": [
+      "facepunch.flatgrass"
+    ],
+    "RankType": "None",
+    "PerMapRanking": false,
+    "LeaderboardType": "None",
+    "CsProjName": "",
+    "StartupScene": "scenes/portaballs.scene",
+    "Compiler": {
+      "ReleaseMode": "Release",
+      "DefineConstants": "SANDBOX;PORTABALLS_P1;PORTABALLS_P2;PORTABALLS_P4"
+    }
+  }
+}

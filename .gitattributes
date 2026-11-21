@@ -1,0 +1,12 @@
+* text=auto
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+# Kept byte for byte: the installer copies these over the engine's own files.
+engine-patches/files/** -text
+*.patch -text
+*.shader_c binary
+*.dll binary
+*.png binary
+*.gif binary
+*.jpg binary
+*.mp4 binary

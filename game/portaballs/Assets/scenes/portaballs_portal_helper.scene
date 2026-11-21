@@ -1,0 +1,55 @@
+{
+  "__guid": "89317535-2ecf-4a0e-819e-8531bfc77587",
+  "GameObjects": [
+    {
+      "__guid": "d76fd84b-57cc-4918-ae47-7df8e4f68620",
+      "Flags": 0,
+      "Name": "Portaballs",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Portaballs.PortaballsGame",
+          "__guid": "3dc3837a-4004-439a-87e0-51a8ee8333a3",
+          "SwapHandColours": false,
+          "UseRealGravity": true,
+          "GravityMetres": 9.81,
+          "AutoThrow": false,
+          "AutoThrowScript": "TwoThrows",
+          "AutoThrowDelay": 3,
+          "DeskEyeHeight": 1.6,
+          "UseHelper": true,
+          "HelperPorts": "8443,28461",
+          "HelperDeskTest": true,
+          "ShowReadout": true,
+          "PortalProof": "HelperThrow"
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 60,
+    "NetworkInterpolation": true,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "portaballs_portal_helper",
+  "Description": "Desk test of the helper link: a stand-in player throws from helper samples. Start helper\\dist\\PortaballsHelper.exe --fake --port 8443 first.",
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 1
+}

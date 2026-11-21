@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Portaballs.Core.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The engine-free core sources this project tests, compiled in directly so the very same
+         files can also be compiled by s&box. -->
+    <Compile Include="..\..\src\Common\**\*.cs" LinkBase="src\Common" />
+    <Compile Include="..\..\src\Throwing\**\*.cs" LinkBase="src\Throwing" />
+    <!-- The turn-and-shift type the space alignment maths shares with portals. -->
+    <Compile Include="..\..\src\Portals\RigidTransform.cs" Link="src\Portals\RigidTransform.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,309 @@
+diff --git a/engine/Sandbox.SceneRenderer/Native/StandardPipeline.cs b/engine/Sandbox.SceneRenderer/Native/StandardPipeline.cs
+index 5d2064d60..8b13fddc1 100644
+--- a/engine/Sandbox.SceneRenderer/Native/StandardPipeline.cs
++++ b/engine/Sandbox.SceneRenderer/Native/StandardPipeline.cs
+@@ -119,6 +119,10 @@ internal sealed class StandardPipeline
+ 		// First, so the reflection records alongside this view's passes
+ 		PlanarReflections.AddToView( view, camera );
+ 
++		// Portaballs patch P2: each view (each eye) gets its own picture of the far side of a portal (set aside here,
++		// drawn in the view's AfterDepthPrepass stage, which needs the managed hooks)
++		PortalViews.AddToView( view, camera, hooks );
++
+ 		var occlusionCulled = RenderPipeline.OcclusionCulling && setup.m_bRenderOpaque && !setup.m_bWireframe && !quadOverdraw;
+ 		var occlusionHistory = occlusionCulled ? NativeOcclusionCull.HistoryFor( camera ) : null;
+ 		if ( occlusionCulled )
+diff --git a/engine/Sandbox.Engine/Systems/Render/PortalViews.cs b/engine/Sandbox.Engine/Systems/Render/PortalViews.cs
+new file mode 100644
+index 000000000..15e9e7924
+--- /dev/null
++++ b/engine/Sandbox.Engine/Systems/Render/PortalViews.cs
+@@ -0,0 +1,288 @@
++using NativeEngine;
++using System.Collections.Concurrent;
++
++namespace Sandbox.Rendering;
++
++/// <summary>
++/// Portaballs patch P2. The far side of up to two portals, drawn once for EVERY view of a camera (in a headset: once
++/// per eye) and handed to that view's materials through the view's own attributes, the way
++/// <see cref="PlanarReflections"/> hands each view its reflection.
++///
++/// Why not a command list on the portal's renderer (patch P1, <see cref="CommandList.DrawPortal"/>): measured in a
++/// headset on 2026-11-19, the engine runs a renderer's ExecuteBefore list in the LEFT eye's pass only. The right eye
++/// then pasted the left eye's picture, which made the tester's eyes feel crossed.
++///
++/// Two steps per view:
++/// 1. While the view's layers are set up (<see cref="AddToView"/>, called from StandardPipeline): a picture is set
++///    aside for each active end and published in the view's attributes (<see cref="End.TextureAttribute"/>,
++///    <see cref="End.RectAttribute"/>, <see cref="End.HasAttribute"/> = true). Nothing is drawn yet: adding a view
++///    at this point is refused by the engine ("adding views while previous rendering is running", seen 2026-11-19).
++/// 2. While the view itself renders, right after its depth prepass (<see cref="RenderForCurrentView"/>, called from
++///    SceneCamera's AfterDepthPrepass stage, which runs once per view): the view's eye is carried through each end,
++///    its own projection is cut off at the exit wall, and the far side is drawn into that picture as a child of the
++///    view, exactly as patch P1 does from a command list. The paint is drawn later in the same view and reads it.
++///
++/// Every other view of the camera (the pictures themselves, reflections) gets <see cref="End.HasAttribute"/> = false:
++/// a portal seen through a portal shows the material's fallback.
++/// </summary>
++public static class PortalViews
++{
++	/// <summary>One portal end: what to draw behind it, and which attributes carry the picture.</summary>
++	public struct End
++	{
++		/// <summary>Draw this end in this frame. False = its HasAttribute is set to false in every view.</summary>
++		public bool Active;
++
++		/// <summary>Carries a real eye to the virtual eye (world units, scale 1).</summary>
++		public Transform Crossing;
++
++		/// <summary>The exit wall. Only what is in front of it is drawn.</summary>
++		public Plane Keep;
++
++		/// <summary>Moves <see cref="Keep"/> along its normal before cutting, world units.</summary>
++		public float ClipOffset;
++
++		/// <summary>When the virtual eye is less than this behind the cut, draw without the cut (world units).</summary>
++		public float PlainWithin;
++
++		/// <summary>0 = rebuild the view's projection from its side planes, 1 = the view's own matrix as native reports it.</summary>
++		public int ProjectionSource;
++
++		/// <summary>Tags left out of the picture. Not copied: don't change the set after handing it over.</summary>
++		public TagSet ExcludeTags;
++
++		public string HasAttribute;
++		public string TextureAttribute;
++		public string RectAttribute;
++	}
++
++	sealed class Request
++	{
++		public CameraComponent Camera;
++		public SceneCamera SceneCamera;
++		public End First, Second;
++		public float Scale;
++	}
++
++	/// <summary>What step 1 set aside for one view, waiting for step 2.</summary>
++	sealed class Pending
++	{
++		public Request Request;
++		public RenderTarget First, Second;
++		public ulong Frame;
++	}
++
++	static Request _request;
++	static readonly ConcurrentDictionary<IntPtr, Pending> _pending = new();
++
++	/// <summary>Pictures drawn since the engine started (both ends, all views). A rough counter for scripts.</summary>
++	public static int PicturesDrawn => System.Threading.Volatile.Read( ref _picturesDrawn );
++	static int _picturesDrawn;
++
++	/// <summary>Pictures set aside in step 1 since the engine started.</summary>
++	public static int PicturesPlanned => System.Threading.Volatile.Read( ref _picturesPlanned );
++	static int _picturesPlanned;
++
++	/// <summary>Views of the requested camera seen in step 1 since the engine started (eyes, pictures, reflections).</summary>
++	public static int ViewsSeen => System.Threading.Volatile.Read( ref _viewsSeen );
++	static int _viewsSeen;
++
++	/// <summary>The eye of the latest view a picture was drawn for. For scripts.</summary>
++	public static Transform LastEye { get; private set; }
++
++	/// <summary>
++	/// Draw these two ends in every view of <paramref name="camera"/> from now on. Call from the game thread, every
++	/// frame the ends move. <paramref name="resolutionScale"/>: picture size against the view, 0.1 to 1.
++	/// </summary>
++	public static void Set( CameraComponent camera, in End first, in End second, float resolutionScale )
++	{
++		if ( !camera.IsValid() ) { Clear(); return; }
++		var r = new Request
++		{
++			Camera = camera,
++			SceneCamera = camera.SceneCamera,
++			First = first,
++			Second = second,
++			Scale = Math.Clamp( resolutionScale, 0.1f, 1f )
++		};
++		System.Threading.Volatile.Write( ref _request, r );
++	}
++
++	/// <summary>No portal pictures any more. Views are left alone (their attributes are not touched).</summary>
++	public static void Clear()
++	{
++		System.Threading.Volatile.Write( ref _request, null );
++	}
++
++	/// <summary>
++	/// Step 1. Called as each view's layers are set up (StandardPipeline), right after
++	/// <see cref="PlanarReflections.AddToView"/>. <paramref name="hooks"/>: the view will run its managed stage hooks
++	/// (without them step 2 never comes, so nothing is promised).
++	/// </summary>
++	internal static void AddToView( ISceneView view, SceneCamera camera, bool hooks )
++	{
++		var request = System.Threading.Volatile.Read( ref _request );
++		if ( request is null || camera is null || !ReferenceEquals( request.SceneCamera, camera ) )
++			return;
++
++		System.Threading.Interlocked.Increment( ref _viewsSeen );
++
++		var attributes = view.GetRenderAttributesPtr();
++
++		// "No picture" first, in every view of this camera, so nothing is inherited.
++		if ( !string.IsNullOrEmpty( request.First.HasAttribute ) ) attributes.SetBoolValue( request.First.HasAttribute, false );
++		if ( !string.IsNullOrEmpty( request.Second.HasAttribute ) ) attributes.SetBoolValue( request.Second.HasAttribute, false );
++
++		// The pictures themselves, reflections, cube captures: none of their own (a portal seen through a portal).
++		if ( !hooks || attributes.GetBoolValue( "IsReflection", false ) || view.GetParent().IsValid || view.GetRenderTargetArrayIndex() >= 0 )
++			return;
++
++		if ( view.GetFrustum().IsOrthographic() )
++			return;
++
++		var viewport = view.GetMainViewport().Rect;
++		var pending = new Pending { Request = request, Frame = Application.FrameCount };
++		pending.First = SetAside( attributes, request.First, viewport, request.Scale, 0 );
++		pending.Second = SetAside( attributes, request.Second, viewport, request.Scale, 1 );
++		if ( pending.First is null && pending.Second is null )
++			return;
++
++		// Views are made fresh each frame and their memory is used again: drop anything older than a few frames.
++		if ( _pending.Count > 16 )
++		{
++			foreach ( var kv in _pending )
++			{
++				if ( Application.FrameCount > kv.Value.Frame + 4 ) _pending.TryRemove( kv.Key, out _ );
++			}
++		}
++		_pending[(IntPtr)view] = pending;
++	}
++
++	static RenderTarget SetAside( CRenderAttributes attributes, in End end, Rect viewport, float scale, int slot )
++	{
++		if ( !end.Active || string.IsNullOrEmpty( end.TextureAttribute ) || string.IsNullOrEmpty( end.HasAttribute ) )
++			return null;
++
++		int width = Math.Max( 16, (int)MathF.Round( viewport.Width * scale ) );
++		int height = Math.Max( 16, (int)MathF.Round( viewport.Height * scale ) );
++		// targetId keeps the ends apart; two eyes asking for the same one in a frame get two pictures (the first is on loan).
++		var target = RenderTarget.GetTemporary( width, height, ImageFormat.RGBA16161616F, ImageFormat.None, MultisampleAmount.MultisampleNone, 1, "Portaballs portal", slot );
++
++		attributes.SetTextureValue( end.TextureAttribute, target.ColorTarget.native, -1 );
++		if ( !string.IsNullOrEmpty( end.RectAttribute ) ) attributes.SetVector4DValue( end.RectAttribute, new Vector4( 0, 0, 1, 1 ) );
++		attributes.SetBoolValue( end.HasAttribute, true );
++		System.Threading.Interlocked.Increment( ref _picturesPlanned );
++		return target;
++	}
++
++	/// <summary>
++	/// Step 2. Called from SceneCamera's AfterDepthPrepass stage, inside the view being drawn (once per view, so once
++	/// per eye in a headset). Draws what step 1 set aside for this view.
++	/// </summary>
++	internal static void RenderForCurrentView()
++	{
++		if ( _pending.IsEmpty || !Graphics.IsActive )
++			return;
++
++		var view = Graphics.SceneView;
++		if ( !view.IsValid || !_pending.TryRemove( (IntPtr)view, out var pending ) )
++			return;
++
++		var camera = pending.Request.Camera;
++		if ( !camera.IsValid() )
++			return;
++
++		if ( pending.First is not null ) Draw( camera, pending.Request.First, pending.First, 0 );
++		if ( pending.Second is not null ) Draw( camera, pending.Request.Second, pending.Second, 1 );
++	}
++
++	static void Draw( CameraComponent camera, in End end, RenderTarget target, int slot )
++	{
++		// This view's own eye (in a headset: the eye being drawn), carried through the portal.
++		var eye = new Transform( Graphics.CameraTransform.Position, Graphics.CameraTransform.Rotation );
++		var virtualEye = end.Crossing.ToWorld( eye );
++
++		float zn = camera.ZNear;
++		float zf = camera.ZFar;
++
++		// This view's own projection, so the picture lines up with the view pixel for pixel when pasted by screen position.
++		Matrix projection = end.ProjectionSource == 1 ? Graphics.ViewFrustum.GetProj() : ProjectionOfCurrentView( zn, zf );
++
++		var clipPlane = new Plane( end.Keep.Position + end.ClipOffset * end.Keep.Normal, end.Keep.Normal );
++		float behind = -clipPlane.GetDistance( virtualEye.Position );
++		if ( behind < 0f || behind >= end.PlainWithin )
++		{
++			// False = the virtual eye is not behind the plane: nothing to cut away in front of it, draw it plain.
++			ObliqueNearPlane( ref projection, virtualEye, clipPlane );
++		}
++
++		var setup = new ViewSetup
++		{
++			Transform = virtualEye,
++			ZNear = zn,
++			ZFar = zf,
++			ProjectionMatrix = projection,
++			EnablePostprocessing = false,
++			EnableUI = false,
++			EnableDebugOverlays = false,
++			ViewHash = HashCode.Combine( "Portaballs portal", slot ),
++			ExcludeTags = end.ExcludeTags
++		};
++
++		// A child of the view being drawn (CameraComponent passes Graphics.SceneView), like P1's DrawPortal.
++		if ( !camera.RenderToTexture( target.ColorTarget, target.DepthTarget, setup, out var data ) || !data.IsValid )
++			return;
++
++		LastEye = eye;
++		System.Threading.Interlocked.Increment( ref _picturesDrawn );
++	}
++
++	/// <summary>
++	/// The off-axis projection of the view being drawn, rebuilt from its four side planes, in the layout of
++	/// <see cref="Matrix.CreateProjection"/> (depth 0 at near, 1 at far). The same lines as patch P1's
++	/// PortalProjectionOfCurrentView.
++	/// </summary>
++	static Matrix ProjectionOfCurrentView( float zn, float zf )
++	{
++		var f = Graphics.Frustum;
++		var inv = Graphics.CameraTransform.Rotation.Inverse;
++		Vector3 r = inv * f.RightPlane.Normal, l = inv * f.LeftPlane.Normal;
++		Vector3 t = inv * f.TopPlane.Normal, b = inv * f.BottomPlane.Normal;
++
++		float tanR = r.x / r.y, tanL = l.x / l.y, tanU = -t.x / t.z, tanD = -b.x / b.z;
++		if ( tanL > tanR ) (tanL, tanR) = (tanR, tanL);
++		if ( tanD > tanU ) (tanD, tanU) = (tanU, tanD);
++
++		System.Numerics.Matrix4x4 m = default;
++		m.M11 = 2f / (tanR - tanL);
++		m.M22 = 2f / (tanU - tanD);
++		m.M13 = (tanR + tanL) / (tanR - tanL);
++		m.M23 = (tanU + tanD) / (tanU - tanD);
++		m.M33 = zf / (zn - zf);
++		m.M34 = zn * zf / (zn - zf);
++		m.M43 = -1f;
++		return m;
++	}
++
++	/// <summary>Patch P1's PortalObliqueNearPlane, unchanged (Lengyel's oblique near plane for this matrix layout).</summary>
++	static bool ObliqueNearPlane( ref Matrix projection, in Transform eye, in Plane keep )
++	{
++		var nl = eye.Rotation.Inverse * keep.Normal;
++		var c = new System.Numerics.Vector4( -nl.y, nl.z, -nl.x, keep.GetDistance( eye.Position ) );
++		if ( !(c.W < 0f) ) return false;
++
++		System.Numerics.Matrix4x4 m = projection;
++		var q = new System.Numerics.Vector4( (MathF.Sign( c.X ) + m.M13) / m.M11, (MathF.Sign( c.Y ) + m.M23) / m.M22, -1f, (1f + m.M33) / m.M34 );
++		float d = System.Numerics.Vector4.Dot( c, q );
++		if ( MathF.Abs( d ) < 1e-12f ) return false;
++		float a = 1f / d;
++		if ( !(a > 0f) ) return false;
++
++		m.M31 = a * c.X;
++		m.M32 = a * c.Y;
++		m.M33 = a * c.Z;
++		m.M34 = a * c.W;
++		projection = m;
++		return true;
++	}
++}

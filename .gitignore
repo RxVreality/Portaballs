@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+TestResults/
+core/tests/**/out/
+helper/.build/
+
+# s&box writes these into the project when it opens it
+game/portaballs/.sbox/
+game/portaballs/**/*.csproj
+game/portaballs/**/Properties/
+game/portaballs/*.slnx
+game/portaballs/Code/Core/
+*.scene_c

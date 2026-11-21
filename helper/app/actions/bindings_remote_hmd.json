@@ -1,0 +1,17 @@
+{
+  "action_manifest_version": 0,
+  "alias_info": {},
+  "bindings": {
+    "/actions/link": {
+      "eyetracking": [
+        {
+          "output": "/actions/link/in/gaze",
+          "path": "/user/head/eyetracking"
+        }
+      ]
+    }
+  },
+  "controller_type": "remote_hmd",
+  "description": "Eye gaze for the Portaballs helper. UNPROVEN: the path was worked out from the installed SteamVR files, not from documentation. Check it with the headset on.",
+  "name": "Portaballs helper defaults (headset eye gaze)"
+}

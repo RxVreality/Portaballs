@@ -1,0 +1,24 @@
+{
+  "actions": [
+    { "name": "/actions/link/in/grip", "type": "vector1", "requirement": "suggested" },
+    { "name": "/actions/link/in/trigger", "type": "vector1", "requirement": "suggested" },
+    { "name": "/actions/link/in/gaze", "type": "eyetracking", "requirement": "optional" }
+  ],
+  "action_sets": [
+    { "name": "/actions/link", "usage": "leftright" }
+  ],
+  "default_bindings": [
+    { "controller_type": "frame_controller", "binding_url": "bindings_frame_controller.json" },
+    { "controller_type": "frame_hmd", "binding_url": "bindings_frame_hmd.json" },
+    { "controller_type": "remote_hmd", "binding_url": "bindings_remote_hmd.json" }
+  ],
+  "localization": [
+    {
+      "language_tag": "en_US",
+      "/actions/link": "Portaballs helper",
+      "/actions/link/in/grip": "Grip squeeze",
+      "/actions/link/in/trigger": "Trigger pull",
+      "/actions/link/in/gaze": "Eye gaze"
+    }
+  ]
+}

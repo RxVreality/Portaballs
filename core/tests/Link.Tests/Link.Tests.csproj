@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Portaballs.Core.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The engine-free core sources this project tests, compiled in directly so the very same
+         files can also be compiled by s&box and by the helper program. -->
+    <Compile Include="..\..\src\Common\**\*.cs" LinkBase="src\Common" />
+    <Compile Include="..\..\src\Link\**\*.cs" LinkBase="src\Link" />
+  </ItemGroup>
+
+</Project>

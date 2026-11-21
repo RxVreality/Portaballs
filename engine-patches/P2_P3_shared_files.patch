@@ -1,0 +1,64 @@
+diff --git a/engine/Sandbox.Engine/Platform/VR/VRSystem.Rendering.cs b/engine/Sandbox.Engine/Platform/VR/VRSystem.Rendering.cs
+index 2f38647e6..d32568514 100644
+--- a/engine/Sandbox.Engine/Platform/VR/VRSystem.Rendering.cs
++++ b/engine/Sandbox.Engine/Platform/VR/VRSystem.Rendering.cs
+@@ -156,11 +156,21 @@ internal static unsafe partial class VRSystem
+ 		);
+ 	}
+ 
++	/// <summary>
++	/// Portaballs patch P3. On: each eye sits half the eye distance either side of the head (the camera). Off: the
++	/// engine's own placement, a whole eye distance from the position passed in. SceneCamera.RenderStereo used to pass
++	/// the LEFT eye's position in for the right eye, so the two eyes came out the right distance apart but with the right
++	/// eye on the head and the left eye a whole eye distance to its left: the world was drawn 3.5 cm left of the head
++	/// (measured in the tester's Steam Frame, 2026-11-19: eyes 70.5 mm apart, one 0.0 mm and one 70.5 mm from the head).
++	/// </summary>
++	[ConVar( "vr_eyes_centred", Help = "Portaballs patch P3: place the two VR eyes half the eye distance either side of the head (off = the engine's original placement)." )]
++	internal static bool EyesCentred { get; set; } = true;
++
+ 	internal static Transform GetTransformForEye( Vector3 cameraPosition, Rotation cameraRotation, VREye eye )
+ 	{
+ 		var transform = new Transform();
+ 
+-		var positionOffset = (eye == VREye.Left ? cameraRotation.Left : cameraRotation.Right) * IPD;
++		var positionOffset = (eye == VREye.Left ? cameraRotation.Left : cameraRotation.Right) * (EyesCentred ? IPD * 0.5f : IPD);
+ 		transform.Position = cameraPosition + positionOffset;
+ 		transform.Rotation = cameraRotation;
+ 		transform.Scale = 1.0f;
+diff --git a/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs b/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs
+index f4877d88e..c37f34197 100644
+--- a/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs
++++ b/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs
+@@ -690,6 +690,9 @@ public sealed partial class SceneCamera : IDisposable, IManagedCamera
+ 					// Light shadow-mask command lists (screen-space contact shadows) only need the
+ 					// full-res depth buffer, and this stage already runs per view with a valid.
+ 					ShadowMapperCallbacks.RenderScreenSpaceShadows();
++
++					// Portaballs patch P2: this view's portal pictures, set aside when its layers were set up
++					Rendering.PortalViews.RenderForCurrentView();
+ 					break;
+ 				}
+ 
+@@ -1118,6 +1121,11 @@ public sealed partial class SceneCamera : IDisposable, IManagedCamera
+ 
+ 		var n = setup.Native;
+ 
++		// Portaballs patch P3: both eyes are placed from the head. The loop below overwrites n.CameraPosition with
++		// the left eye's, so reading it again for the right eye placed that eye from the left one.
++		var headPosition = n.CameraPosition;
++		var headRotation = n.CameraRotation;
++
+ 		for ( int iEye = 0; iEye < 2; ++iEye )
+ 		{
+ 			bool isLeftEye = iEye == 0;
+@@ -1136,7 +1144,9 @@ public sealed partial class SceneCamera : IDisposable, IManagedCamera
+ 			VRSystem.ClipPlanes.ZFar = ZFar;
+ 
+ 			// Grab overrides for this eye
+-			var transform = VRSystem.GetTransformForEye( n.CameraPosition, n.CameraRotation, eye );
++			var transform = VRSystem.EyesCentred
++				? VRSystem.GetTransformForEye( headPosition, headRotation, eye )
++				: VRSystem.GetTransformForEye( n.CameraPosition, n.CameraRotation, eye );
+ 			n.CameraPosition = transform.Position;
+ 			n.CameraRotation = transform.Rotation;
+ 

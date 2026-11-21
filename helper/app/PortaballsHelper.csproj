@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Portaballs helper: reads hands, head and eyes from SteamVR several hundred times a second and
+       streams them to the game over a WebSocket on this PC. WinExe = no console window. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <AssemblyName>PortaballsHelper</AssemblyName>
+    <RootNamespace>Portaballs.Helper</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Version>0.1.0</Version>
+    <Product>Portaballs helper</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The same message code the game compiles (see core\src\Link). -->
+    <Compile Include="..\..\core\src\Common\**\*.cs" LinkBase="core\Common" />
+    <Compile Include="..\..\core\src\Link\**\*.cs" LinkBase="core\Link" />
+    <!-- Valve's official C# binding for OpenVR (BSD-3, see thirdparty\openvr\LICENSE). Generated code: left untouched. -->
+    <Compile Include="..\thirdparty\openvr\openvr_api.cs" Link="thirdparty\openvr\openvr_api.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\thirdparty\openvr\openvr_api.dll" Link="openvr_api.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\thirdparty\openvr\LICENSE" Link="openvr_LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="actions\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Helper.Tests" />
+  </ItemGroup>
+
+</Project>

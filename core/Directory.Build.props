@@ -1,0 +1,11 @@
+<Project>
+  <!-- Shared by every project under core/. The src files are also compiled by s&box, so keep the
+       language settings close to what s&box game code gets: no implicit usings, nullable off. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>
