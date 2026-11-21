@@ -287,10 +287,16 @@ if (-not $NoShortcuts) {
   }
   $shell = New-Object -ComObject WScript.Shell
   $sboxExe = Join-Path $sbox 'game\sbox.exe'
+  $engineDir = Join-Path $sbox 'game'
+  $proj = Join-Path $gameDir 'portaballs.sbproj'
+  # The flat and editor icons start the engine directly (the same switches as launch.ps1). Only the VR icon
+  # needs the script, because it also starts and stops the tracking helper.
   $icons = @(
     @{ Name = 'Portaballs VR';          Mode = 'vr';     Tip = 'Play Portaballs in your headset (SteamVR)' },
-    @{ Name = 'Portaballs flat screen'; Mode = 'flat';   Tip = 'Play Portaballs in a window, with mouse and keyboard' },
-    @{ Name = 'Portaballs editor';      Mode = 'editor'; Tip = 'Open Portaballs in the s&box editor' }
+    @{ Name = 'Portaballs flat screen'; Mode = 'flat';   Tip = 'Play Portaballs in a window, with mouse and keyboard'
+       Exe = $sboxExe; Args = "-mcp +game `"$proj`" -nosteam -novr -sw -w 1600 -h 900" },
+    @{ Name = 'Portaballs editor';      Mode = 'editor'; Tip = 'Open Portaballs in the s&box editor'
+       Exe = (Join-Path $engineDir 'sbox-dev.exe'); Args = "-project `"$proj`" -nosteam -novr" }
   )
   foreach ($t in $targets) {
     New-Item -ItemType Directory -Force $t | Out-Null
@@ -298,11 +304,18 @@ if (-not $NoShortcuts) {
       # The editor icon only goes in the Start menu (or the -ShortcutDir folder), not on the desktop.
       if ($i.Mode -eq 'editor' -and -not $ShortcutDir -and $t -eq [Environment]::GetFolderPath('Desktop')) { continue }
       $s = $shell.CreateShortcut((Join-Path $t ($i.Name + '.lnk')))
-      # conhost --headless: PowerShell runs with no window at all, so nothing flashes up.
-      $s.TargetPath = Join-Path $env:SystemRoot 'System32\conhost.exe'
-      $s.Arguments = "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$launcher`" -mode $($i.Mode)"
-      $s.WorkingDirectory = $InstallDir
-      $s.WindowStyle = 7
+      if ($i.Exe) {
+        $s.TargetPath = $i.Exe
+        $s.Arguments = $i.Args
+        $s.WorkingDirectory = $engineDir
+      }
+      else {
+        # conhost --headless: PowerShell runs with no window at all, so nothing flashes up.
+        $s.TargetPath = Join-Path $env:SystemRoot 'System32\conhost.exe'
+        $s.Arguments = "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$launcher`" -mode $($i.Mode)"
+        $s.WorkingDirectory = $InstallDir
+        $s.WindowStyle = 7
+      }
       $s.IconLocation = "$sboxExe,0"
       $s.Description = $i.Tip
       $s.Save()

@@ -28,8 +28,8 @@ I've only played it on a Steam Frame streaming from my PC (RTX 4070 Super). Othe
 ## Install
 
 1. Download this repository: **Code > Download ZIP** at the top of this page, or `git clone` it.
-2. Unzip it somewhere with a short path, like `C:\Portaballs-source`.
-3. Double-click `Install Portaballs.cmd`. Nothing here is code signed, so Windows may warn you about a file from the internet: click **More info**, then **Run anyway**.
+2. Right-click the zip, choose **Properties**, tick **Unblock** and click **OK**. That stops Windows asking about every file inside. Then unzip it somewhere with a short path, like `C:\Portaballs-source`.
+3. Double-click `Install Portaballs.cmd`. Nothing here is code signed yet, so Windows may still say it's from an unknown publisher: click **More info**, then **Run anyway**.
 4. It checks for Git and the .NET 10 SDK and offers to get them if they're missing. Then it asks you to type YES for Facepunch's terms, downloads and builds the engine, and adds the game.
 
 Everything goes in `C:\Portaballs`. When it's done you get **Portaballs VR** and **Portaballs flat screen** on your desktop, and an editor shortcut in the Start menu.
@@ -61,7 +61,9 @@ Some buttons switch test settings for the portal view: **B** cycles the view mod
 
 ## Problems
 
-**My antivirus flagged something.** Nothing here is code signed. The installer is a PowerShell script that downloads things and builds programs, and the tracking helper it builds (`C:\Portaballs\helper\PortaballsHelper.exe`) is a brand new unsigned program that reads SteamVR and listens on a local port, which some antivirus software doesn't like the look of. All of it is built on your PC from the source here, so you can read what it does. If you'd rather not allow it, the game still runs without the helper.
+**My antivirus flagged something.** Nothing here is code signed yet. I'm working on that, but it'll take a while. The installer is a PowerShell script that downloads things and builds programs, and the tracking helper it builds (`C:\Portaballs\helper\PortaballsHelper.exe`) is a brand new unsigned program that reads SteamVR and listens on a local port, which some antivirus software doesn't like the look of. All of it is built on your PC from the source here, so you can read what it does first.
+
+Please don't turn your antivirus off for this. If it quarantined the helper and you trust it, restore it, or add an exclusion for `C:\Portaballs` only. If you'd rather not, the game still runs without the helper. If Windows Defender flagged it, you can report it as a false positive at https://www.microsoft.com/wdsi/filesubmission.
 
 **The installer stops during Setup.bat.** Run it again. If it keeps stopping at the same place, open an issue with the log from `C:\Portaballs\logs`.
 
