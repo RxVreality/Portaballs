@@ -2,7 +2,7 @@
 
 A VR test room where you throw portaballs by hand. They're paint balls that make portals, orange from your left hand and blue from your right. The paint splats, drips down the wall and pools on the floor. Once there's an orange patch and a blue patch they link up into a portal, and you can walk through it, throw stuff through it or drop through it if it's on the floor. Walls, floor and ceiling all work.
 
-![The test room with an orange portal on one wall and a blue one on the other](docs/room.png)
+![In the headset: blue and orange splats dripping, looking down into an endless tunnel of portals, then walking up to an orange portal on the wall](docs/demo.gif)
 
 There's no actual game yet, just one gray room with some boxes in it and a couple of debug boards on the walls. I wanted to know if throwing paint with your own arm and then stepping through it would feel good in a headset, and it does, so I'm putting it out there for anyone who wants to try it or pull it apart.
 
