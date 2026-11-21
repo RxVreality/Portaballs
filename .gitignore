@@ -14,4 +14,3 @@ game/portaballs/**/*.csproj
 game/portaballs/**/Properties/
 game/portaballs/*.slnx
 game/portaballs/Code/Core/
-*.scene_c

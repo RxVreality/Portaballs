@@ -21,3 +21,4 @@ code/Properties/*
 
 # Exported / standalone games
 Exports/
+!*.scene_c

@@ -1,12 +1,12 @@
 # Portaballs
 
-A VR test room where you throw paint balls by hand. Orange from your left hand, blue from your right. The paint splats, drips down the wall and pools on the floor. Once there's an orange patch and a blue patch they link up into a portal, and you can walk through it, throw stuff through it or drop through it if it's on the floor. Walls, floor and ceiling all work.
+A VR test room where you throw portaballs by hand. They're paint balls that make portals, orange from your left hand and blue from your right. The paint splats, drips down the wall and pools on the floor. Once there's an orange patch and a blue patch they link up into a portal, and you can walk through it, throw stuff through it or drop through it if it's on the floor. Walls, floor and ceiling all work.
 
 ![The test room with an orange portal on one wall and a blue one on the other](docs/room.png)
 
 There's no actual game yet, just one gray room with some boxes in it and a couple of debug boards on the walls. I wanted to know if throwing paint with your own arm and then stepping through it would feel good in a headset, and it does, so I'm putting it out there for anyone who wants to try it or pull it apart.
 
-![Looking through the orange paint into the room on the other side](docs/through.png)
+![Two portals facing each other, so looking through one shows an endless tunnel](docs/through.png)
 
 Yes, the idea comes from Portal. The crossing works like Portal's: a patch high on a wall drops you out of it, and falling into a floor portal throws you out of the other end at the speed you went in. Nothing in it is from Valve's games.
 
@@ -40,7 +40,7 @@ If it stops partway, for example because your connection dropped, run it again. 
 
 **In the headset:** start SteamVR, then double-click **Portaballs VR**.
 
-- Squeeze grip to get a ball, throw, and let go. Left hand throws orange, right hand throws blue.
+- Squeeze grip to get a portaball, throw, and let go. Left hand throws orange, right hand throws blue.
 - The ball goes where you threw it, pulled a little toward what you were looking at.
 - Left stick walks, right stick turns.
 - Hit the same patch again to make it bigger. Hit somewhere new and that color's patch moves there.
@@ -53,6 +53,7 @@ Some buttons switch test settings for the portal view: **B** cycles the view mod
 ## What's rough
 
 - It's one test room. No menu, no sound, no goal.
+- Each hand only throws one color for now. Next I'm adding a selection wheel on each hand, so you can pick blue or orange portaballs on your dominant hand.
 - Your hand and the ball you're holding show through a portal, but a few millimeters right at the surface can show a thin gap if you look from the side.
 - While a big splat is still dripping, the opening's center can jump down a bit in the first second or two. It settles after that.
 - Throws tend to land a little high. I'm not sure why yet.

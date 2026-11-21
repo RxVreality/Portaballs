@@ -5,6 +5,7 @@
 engine-patches/files/** -text
 *.patch -text
 *.shader_c binary
+*.scene_c binary
 *.dll binary
 *.png binary
 *.gif binary
